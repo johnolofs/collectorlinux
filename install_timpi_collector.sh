@@ -10,10 +10,6 @@ sudo rm -r /opt/timpi
 echo "Updating and upgrading the system..."
 sudo apt update && sudo apt -y upgrade
 
-# Automatic Updates
-echo "Installing unattended-upgrades..."
-sudo apt install -y unattended-upgrades
-sudo dpkg-reconfigure -plow unattended-upgrades
 
 # Download the collector 0.9.0
 echo "Downloading the collector 0.9.0..."
