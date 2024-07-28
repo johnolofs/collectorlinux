@@ -11,11 +11,11 @@ echo "Updating and upgrading the system..."
 sudo apt update && sudo apt -y upgrade
 
 # Create directory for Timpi if it doesn't exist
-mkdir -p /home/timpi
+sudo mkdir -p /home/timpi
 
 # Download the collector 0.9.0
 echo "Downloading the collector 0.9.0..."
-wget https://alexjenkins.tech/TimpiCollector-0-9-0-LINUX.zip -O /home/timpi/TimpiCollector-0-9-0-LINUX.zip
+sudo wget https://alexjenkins.tech/TimpiCollector-0-9-0-LINUX.zip -O /home/timpi/TimpiCollector-0-9-0-LINUX.zip
 
 # Install Unzip if not already installed
 echo "Installing unzip..."
@@ -37,7 +37,7 @@ fi
 
 # Download the collector 0.9.1
 echo "Downloading the collector 0.9.1..."
-wget https://www.alexjenkins.tech/TimpiCollector-0-9-1-LINUX.zip -O /home/timpi/TimpiCollector-0-9-1-LINUX.zip
+sudo wget https://www.alexjenkins.tech/TimpiCollector-0-9-1-LINUX.zip -O /home/timpi/TimpiCollector-0-9-1-LINUX.zip
 
 # Unpack The Files To Timpi Directory For Upgrade
 echo "Upgrading to the collector version 0.9.1..."
