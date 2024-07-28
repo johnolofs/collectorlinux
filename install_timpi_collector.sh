@@ -1,51 +1,70 @@
 #!/bin/bash
 
+# Define installation directory
+INSTALL_DIR="/opt/timpi"
+
+# Function to handle errors
+handle_error() {
+    echo "An error occurred. Exiting."
+    exit 1
+}
+
 # Remove Previous Version Of Collector
 echo "Removing previous version of collector..."
 sudo systemctl stop collector || true
 sudo systemctl stop collector_ui || true
-sudo rm -rf /opt/timpi || true
+sudo rm -rf "$INSTALL_DIR" || true
 
-# Update & Security
+# Update & Upgrade the system
 echo "Updating and upgrading the system..."
-sudo apt update && sudo apt -y upgrade
+sudo apt update && sudo apt -y upgrade || handle_error
 
-# Create directory for Timpi if it doesn't exist
-sudo mkdir -p /opt/timpi
+# Create directory for Timpi
+sudo mkdir -p "$INSTALL_DIR" || handle_error
 
 # Download the collector 0.9.0
 echo "Downloading the collector 0.9.0..."
-sudo wget https://alexjenkins.tech/TimpiCollector-0-9-0-LINUX.zip -O /opt/timpi/TimpiCollector-0-9-0-LINUX.zip
+sudo wget https://www.alexjenkins.tech/TimpiCollector-0-9-0-LINUX.zip -O "$INSTALL_DIR/TimpiCollector-0-9-0-LINUX.zip" || handle_error
 
 # Install Unzip if not already installed
 echo "Installing unzip..."
-sudo apt install -y unzip
+sudo apt install -y unzip || handle_error
 
 # Unpack The Zip Files
 echo "Unpacking the collector 0.9.0..."
-sudo unzip /opt/timpi/TimpiCollector-0-9-0-LINUX.zip -d /opt/timpi
+sudo unzip "$INSTALL_DIR/TimpiCollector-0-9-0-LINUX.zip" -d "$INSTALL_DIR" || handle_error
 
 # Install the Collector 0.9.0
-if [ -d "/opt/timpi" ]; then
-  echo "Installing the collector 0.9.0..."
-  cd /opt/timpi || exit
-  sudo ./install.sh || exit
-else
-  echo "Directory /opt/timpi does not exist."
-  exit 1
-fi
+echo "Installing the collector 0.9.0..."
+cd "$INSTALL_DIR" || handle_error
+sudo unzip TimpiCollector-0-9-0-beta.zip -d "$INSTALL_DIR" || handle_error
+
+# Setting execute rights
+sudo chmod +x "$INSTALL_DIR/TimpiCollector" || handle_error
+sudo chmod +x "$INSTALL_DIR/TimpiUI" || handle_error
+
+# Install Collector service
+echo "Installing Collector service..."
+sudo mv "$INSTALL_DIR/collector.service" /etc/systemd/system/ || handle_error
+sudo mv "$INSTALL_DIR/collector_ui.service" /etc/systemd/system/ || handle_error
+
+# Enable and start services
+sudo systemctl enable collector || handle_error
+sudo systemctl enable collector_ui || handle_error
+sudo systemctl start collector || handle_error
+sudo systemctl start collector_ui || handle_error
 
 # Download the collector 0.9.1
 echo "Downloading the collector 0.9.1..."
-sudo wget https://www.alexjenkins.tech/TimpiCollector-0-9-1-LINUX.zip -O /opt/timpi/TimpiCollector-0-9-1-LINUX.zip
+sudo wget https://www.alexjenkins.tech/TimpiCollector-0-9-1-LINUX.zip -O "$INSTALL_DIR/TimpiCollector-0-9-1-LINUX.zip" || handle_error
 
 # Unpack The Files To Timpi Directory For Upgrade
 echo "Upgrading to the collector version 0.9.1..."
-sudo unzip -o /opt/timpi/TimpiCollector-0-9-1-LINUX.zip -d /opt/timpi
+sudo unzip -o "$INSTALL_DIR/TimpiCollector-0-9-1-LINUX.zip" -d "$INSTALL_DIR" || handle_error
 
 # Restart the collector UI service
 echo "Restarting the collector UI service..."
-sudo systemctl restart collector_ui || true
+sudo systemctl restart collector_ui || handle_error
 
 echo "Installation and upgrade completed. You can now open your browser and use http://localhost:5015/collector"
-echo "NOTE: If the collector is not running, please remove the timpi.config file in /opt/timpi"
+echo "NOTE: If the collector is not running, please remove the timpi.config file in $INSTALL_DIR"
